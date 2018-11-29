@@ -4,6 +4,7 @@ service: cognito-lambda-authorizer
 plugins:
   - serverless-webpack
   - serverless-hooks-plugin
+  - serverless-offline
 
 custom:
   stage: ${opt:stage, self:provider.stage}
