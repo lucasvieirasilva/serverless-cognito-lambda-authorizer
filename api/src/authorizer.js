@@ -15,7 +15,7 @@ module.exports.handler = (event, context, callback) => {
                 const claims = await verifySignature(keys, bearer, callback);
 
                 if (claims) {
-                    const authResponse = buildAllowAllPolicy(event, claims.sub);
+                    const authResponse = generatePolicy(event, claims.sub);
                     authResponse.context = {
                         sub: claims.sub,
                         email_verified: claims.email_verified,
@@ -71,7 +71,7 @@ const verifySignature = async (keys, bearer, callback) => {
     }
 }
 
-const buildAllowAllPolicy = (event, principalId) => {
+const generatePolicy = (event, principalId) => {
     const policy = {
         principalId: principalId,
         policyDocument: {
