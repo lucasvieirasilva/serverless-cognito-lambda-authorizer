@@ -56,8 +56,6 @@ const verifySignature = async (keys, bearer, callback) => {
 
         const claims = JSON.parse(verifyResult.payload);
 
-        console.log('Claims ', JSON.stringify(claims));
-
         const current_ts = Math.floor(new Date() / 1000);
 
         if (current_ts > claims.exp || claims.aud != process.env.USER_POOL_CLIENT_ID) {
