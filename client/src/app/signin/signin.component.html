@@ -1,0 +1,13 @@
+<div class="text-center">
+    <form class="form-signin" [formGroup]="loginForm" (ngSubmit)="onSubmitLogin(loginForm.value)">
+        <h1 class="text-center">Please sign in</h1>
+
+        <input type="email" formControlName="email" class="form-control" placeholder="Email address" autofocus>
+
+        <input type="password" formControlName="password" class="form-control" placeholder="Password">
+
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <label>Or</label>
+        <button type="button" class="btn btn-lg btn-primary btn-block" routerLink="/signup">Sign Up</button>
+    </form>
+</div>

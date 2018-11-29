@@ -1,0 +1,22 @@
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" *ngIf="(auth.loggedIn | async)">
+    <a class="navbar-brand" routerLink="/">Angular AWS</a>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item" routerLinkActive="active">
+                <a class="nav-link" routerLink="/">Home</a>
+            </li>
+
+            <li class="nav-item" *ngIf="(auth.loggedIn | async)" routerLinkActive="active">
+                <a class="nav-link" (click)="onClickLogout()">Logout</a>
+            </li>
+        </ul>
+        <span class="navbar-text" *ngIf="(auth.loggedIn | async)">
+            {{ auth.userInfo?.username || auth.userInfo?.name }}
+        </span>
+    </div>
+</nav>
+<main class="container">
+    <div class="content">
+        <router-outlet></router-outlet>
+    </div>
+</main>

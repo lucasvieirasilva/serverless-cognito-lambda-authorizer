@@ -1,0 +1,11 @@
+<div class="text-center">
+  <form class="form-signup" [formGroup]="signupForm" (ngSubmit)="onSubmitSignup(signupForm.value)">
+    <h1 class="text-center">Please signup</h1>
+
+    <input type="email" formControlName="email" class="form-control" placeholder="Email address" autofocus>
+
+    <input type="password" formControlName="password" class="form-control" placeholder="Password">
+
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign Up</button>
+  </form>
+</div>

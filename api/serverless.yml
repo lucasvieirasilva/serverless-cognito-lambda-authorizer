@@ -1,0 +1,91 @@
+# serverless.yml
+service: cognito-lambda-authorizer
+
+plugins:
+  - serverless-webpack
+  - serverless-hooks-plugin
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  variables: ${file(./config.yml)}
+  webpack:
+    webpackConfig: './webpack.config.js'
+    includeModules: true
+  hooks:
+    after:aws:deploy:finalize:cleanup:
+      - ./../client/scripts/setup.sh
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  timeout: 30
+  memorySize: 128
+  region: ${opt:region, self:custom.variables.region}
+
+functions:       
+  authorizer:
+    handler: src/authorizer.handler
+    environment:
+      USER_POOL_ID: 
+        Ref: CognitoUserPoolCustomAuthorizer
+      USER_POOL_CLIENT_ID:
+        Ref: AngularAppClient
+
+  getEvent:
+    handler: src/get-event.handler
+    events:
+      - http:
+          path: /event
+          method: get
+          cors: true
+          authorizer: 
+            name: authorizer
+            resultTtlInSeconds: 3600
+            identitySource: method.request.header.Authorization
+            identityValidationExpression: ^Bearer [-0-9a-zA-z\.]*$
+            type: token
+
+  preSignUp:
+    handler: src/confirm.handler
+    events:
+      - cognitoUserPool:
+          pool: CustomAuthorizer
+          trigger: PreSignUp
+  
+resources:
+  Resources:
+    # Cognito - User Pool
+    CognitoUserPoolCustomAuthorizer:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: cognito-lambda-authorizer-user-pool
+        AutoVerifiedAttributes:
+          - email
+        MfaConfiguration: OFF
+        Schema:
+          - AttributeDataType: String
+            Name: email
+            Required: true
+
+    AngularAppClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        GenerateSecret: false
+        RefreshTokenValidity: 200
+        UserPoolId:
+          Ref: CognitoUserPoolCustomAuthorizer
+
+  Outputs:
+    UserPoolId:
+      Description: "The ID of the user pool that is created."
+      Value:
+        Ref: CognitoUserPoolCustomAuthorizer
+
+    AngularAppClientId:
+      Description: "The ID of the user pool react app client id."
+      Value:
+        Ref: AngularAppClient

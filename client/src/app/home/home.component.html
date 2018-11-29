@@ -1,0 +1,9 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="text-center">Hello {{ auth.userInfo?.username || auth.userInfo?.name }}</h1>
+
+        <pre *ngIf="event">
+            {{ event | json }}
+        </pre>
+    </div>
+</div>
