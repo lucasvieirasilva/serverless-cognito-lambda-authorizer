@@ -67,6 +67,7 @@ const verifySignature = async (keys, bearer, callback) => {
     } catch (error) {
         console.log(error);
         callback('Unauthorized');
+        return;
     }
 }
 
