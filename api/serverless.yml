@@ -21,6 +21,12 @@ custom:
     Ref: CognitoUserPoolCustomAuthorizer
   cognitoUserPoolClientIdFromRef:
     Ref: AngularAppClient
+  authorizer:
+    name: authorizer
+    resultTtlInSeconds: 3600
+    identitySource: method.request.header.Authorization
+    identityValidationExpression: ^Bearer [-0-9a-zA-z\.]*$
+    type: token          
 
 package:
   individually: true
@@ -47,12 +53,7 @@ functions:
           path: /event
           method: get
           cors: true
-          authorizer: 
-            name: authorizer
-            resultTtlInSeconds: 3600
-            identitySource: method.request.header.Authorization
-            identityValidationExpression: ^Bearer [-0-9a-zA-z\.]*$
-            type: token          
+          authorizer: ${self:custom.authorizer}
 
   preSignUp:
     handler: src/confirm.handler
