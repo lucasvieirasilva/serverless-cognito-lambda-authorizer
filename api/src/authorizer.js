@@ -1,7 +1,7 @@
 const https = require('https');
 const jose = require('node-jose');
 
-const KEY_URL = `https://cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${process.env.USER_POOL_ID}/.well-known/jwks.json`
+const KEY_URL = `https://cognito-idp.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${process.env.USER_POOL_ID}/.well-known/jwks.json`
 
 module.exports.handler = (event, context, callback) => {
     const bearer = event.authorizationToken;
@@ -14,18 +14,23 @@ module.exports.handler = (event, context, callback) => {
 
                 const claims = await verifySignature(keys, bearer, callback);
 
+                console.log(claims);
+
                 if (claims) {
                     const authResponse = generatePolicy(event, claims.sub);
+
                     authResponse.context = {
                         sub: claims.sub,
                         email_verified: claims.email_verified,
                         email: claims.email,
-                        "cognito:username": claims['cognito:username'] 
+                        "cognito:username": claims['cognito:username']
                     };
 
                     callback(null, authResponse);
                 }
             });
+        } else {
+            callback('Unauthorized');
         }
     });
 }
@@ -45,6 +50,7 @@ const verifySignature = async (keys, bearer, callback) => {
                 break;
             }
         }
+
         if (key_index == -1) {
             callback('Unauthorized');
             return;

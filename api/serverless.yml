@@ -5,16 +5,22 @@ plugins:
   - serverless-webpack
   - serverless-hooks-plugin
   - serverless-offline
+  - serverless-dotenv-plugin
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  variables: ${file(./config.yml)}
   webpack:
     webpackConfig: './webpack.config.js'
     includeModules: true
   hooks:
     after:aws:deploy:finalize:cleanup:
       - ./../client/scripts/setup.sh
+  dotenv:
+    include: []
+  cognitoUserPoolIdFromRef:
+    Ref: CognitoUserPoolCustomAuthorizer
+  cognitoUserPoolClientIdFromRef:
+    Ref: AngularAppClient
 
 package:
   individually: true
@@ -25,16 +31,14 @@ provider:
   stage: dev
   timeout: 30
   memorySize: 128
-  region: ${opt:region, self:custom.variables.region}
+  region: ${opt:region, env:AWS_REGION}
 
 functions:       
   authorizer:
     handler: src/authorizer.handler
     environment:
-      USER_POOL_ID: 
-        Ref: CognitoUserPoolCustomAuthorizer
-      USER_POOL_CLIENT_ID:
-        Ref: AngularAppClient
+      USER_POOL_ID: ${env:COGNITO_USER_POOL_ID, self:custom.cognitoUserPoolIdFromRef}
+      USER_POOL_CLIENT_ID: ${env:COGNITO_USER_POOL_CLIENT_ID, self:custom.cognitoUserPoolClientIdFromRef}
 
   getEvent:
     handler: src/get-event.handler
@@ -48,7 +52,7 @@ functions:
             resultTtlInSeconds: 3600
             identitySource: method.request.header.Authorization
             identityValidationExpression: ^Bearer [-0-9a-zA-z\.]*$
-            type: token
+            type: token          
 
   preSignUp:
     handler: src/confirm.handler
